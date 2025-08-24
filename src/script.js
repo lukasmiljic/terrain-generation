@@ -89,7 +89,7 @@ shaderFolder
   .name("Frequency");
 shaderFolder
   .add(terrainMaterial.uniforms.uAmplitude, "value")
-  .min(0.0)
+  .min(0.1)
   .max(20.0)
   .step(0.1)
   .name("Amplitude");
