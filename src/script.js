@@ -20,8 +20,9 @@ const planeSettings = {
   resolution: 64,
 };
 
-// material
-const material = new THREE.ShaderMaterial({
+
+// terrain
+const terrainMaterial = new THREE.ShaderMaterial({
   wireframe: false,
   uniforms: {
     uFrequency: { value: 0.02 },
@@ -35,25 +36,25 @@ const material = new THREE.ShaderMaterial({
 });
 
 // geometry
-let geometry = new THREE.PlaneGeometry(
+let terrainGeometry = new THREE.PlaneGeometry(
   planeSettings.width,
   planeSettings.height,
   planeSettings.resolution,
   planeSettings.resolution
 );
-const plane = new THREE.Mesh(geometry, material);
-plane.rotation.x = -Math.PI / 2;
-scene.add(plane);
+const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+terrain.rotation.x = -Math.PI / 2;
+scene.add(terrain);
 
 const updateGeometry = () => {
-  plane.geometry.dispose();
-  geometry = new THREE.PlaneGeometry(
+  terrain.geometry.dispose();
+  terrainGeometry = new THREE.PlaneGeometry(
     planeSettings.width,
     planeSettings.height,
     planeSettings.resolution,
     planeSettings.resolution
   );
-  plane.geometry = geometry;
+  terrain.geometry = terrainGeometry;
 };
 
 const planeOptionsFolder = gui.addFolder("Plane");
@@ -63,55 +64,55 @@ planeOptionsFolder
   .max(256)
   .step(1)
   .name("Plane height")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 planeOptionsFolder
   .add(planeSettings, "width")
   .min(16)
   .max(256)
   .step(1)
   .name("Plane width")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 planeOptionsFolder
   .add(planeSettings, "resolution")
   .min(16)
   .max(256)
   .step(1)
   .name("Resolution")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 
 // debug shader controls
 const shaderFolder = gui.addFolder("Terrain");
 shaderFolder
-  .add(material.uniforms.uFrequency, "value")
+  .add(terrainMaterial.uniforms.uFrequency, "value")
   .min(0.01)
   .max(0.05)
   .step(0.001)
   .name("Frequency");
 shaderFolder
-  .add(material.uniforms.uAmplitude, "value")
+  .add(terrainMaterial.uniforms.uAmplitude, "value")
   .min(0.0)
   .max(20.0)
   .step(0.1)
   .name("Amplitude");
 shaderFolder
-  .add(material.uniforms.uOctaves, "value")
+  .add(terrainMaterial.uniforms.uOctaves, "value")
   .min(1)
   .max(8)
   .step(1)
   .name("Octaves");
 shaderFolder
-  .add(material.uniforms.uLacunarity, "value")
+  .add(terrainMaterial.uniforms.uLacunarity, "value")
   .min(1.0)
   .max(4.0)
   .step(0.1)
   .name("Lacunarity");
 shaderFolder
-  .add(material.uniforms.uPersistance, "value")
+  .add(terrainMaterial.uniforms.uPersistance, "value")
   .min(0.1)
   .max(0.7)
   .step(0.01)
   .name("Persistance");
-shaderFolder.add(material, "wireframe").name("Wireframe");
+shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
 
 // sizes
 const sizes = {
