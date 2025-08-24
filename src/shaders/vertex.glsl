@@ -3,7 +3,7 @@ uniform float uFrequency;
 uniform float uAmplitude;
 uniform int uOctaves;
 uniform float uLacunarity;
-uniform float uGain;
+uniform float uPersistance;
 
 // Simplex noise implementation
 vec3 mod289(vec3 x) {
@@ -64,7 +64,7 @@ float fbm(vec2 p) {
 
     value += amplitude * snoise(p * frequency);
     frequency *= uLacunarity;
-    amplitude *= uGain;
+    amplitude *= uPersistance;
   }
 
   return value;

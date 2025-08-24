@@ -24,11 +24,11 @@ const planeSettings = {
 const material = new THREE.ShaderMaterial({
   wireframe: false,
   uniforms: {
-    uFrequency: { value: 0.02 }, // noise frequency
-    uAmplitude: { value: 6.0 }, // noise amplitude
-    uOctaves: { value: 8 }, // number of octaves for FBM
-    uLacunarity: { value: 2.0 }, // frequency multiplier between octaves
-    uGain: { value: 0.5 }, // amplitude multiplier between octaves
+    uFrequency: { value: 0.02 },
+    uAmplitude: { value: 6.0 },
+    uOctaves: { value: 8 },
+    uLacunarity: { value: 2.0 },
+    uPersistance: { value: 0.5 },
   },
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
@@ -45,9 +45,8 @@ const plane = new THREE.Mesh(geometry, material);
 plane.rotation.x = -Math.PI / 2;
 scene.add(plane);
 
-// Function to update geometry when settings change
 const updateGeometry = () => {
-  plane.geometry.dispose(); // Clean up old geometry
+  plane.geometry.dispose();
   geometry = new THREE.PlaneGeometry(
     planeSettings.width,
     planeSettings.height,
@@ -80,7 +79,7 @@ planeOptionsFolder
   .name("Resolution")
   .onChange(updateGeometry);
 
-// Shader uniforms controls
+// debug shader controls
 const shaderFolder = gui.addFolder("Terrain");
 shaderFolder
   .add(material.uniforms.uFrequency, "value")
@@ -107,11 +106,11 @@ shaderFolder
   .step(0.1)
   .name("Lacunarity");
 shaderFolder
-  .add(material.uniforms.uGain, "value")
+  .add(material.uniforms.uPersistance, "value")
   .min(0.1)
   .max(0.7)
   .step(0.01)
-  .name("Gain");
+  .name("Persistance");
 shaderFolder.add(material, "wireframe").name("Wireframe");
 
 // sizes
