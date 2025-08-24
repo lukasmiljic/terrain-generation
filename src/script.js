@@ -14,13 +14,11 @@ const canvas = document.querySelector("canvas.webgl");
 // scene
 const scene = new THREE.Scene();
 
-const planeSettings = {
-  height: 64,
-  width: 64,
-  resolution: 64,
-};
+/*
+terrain
+*/
 
-// terrain
+// shader based material
 const terrainMaterial = new THREE.ShaderMaterial({
   wireframe: false,
   uniforms: {
@@ -35,52 +33,6 @@ const terrainMaterial = new THREE.ShaderMaterial({
   fragmentShader: fragmentShader,
 });
 
-// geometry
-let terrainGeometry = new THREE.PlaneGeometry(
-  planeSettings.width,
-  planeSettings.height,
-  planeSettings.resolution,
-  planeSettings.resolution
-);
-const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
-terrain.rotation.x = -Math.PI / 2;
-scene.add(terrain);
-
-const updateGeometry = () => {
-  terrain.geometry.dispose();
-  terrainGeometry = new THREE.PlaneGeometry(
-    planeSettings.width,
-    planeSettings.height,
-    planeSettings.resolution,
-    planeSettings.resolution
-  );
-  terrain.geometry = terrainGeometry;
-};
-
-const planeOptionsFolder = gui.addFolder("Plane");
-planeOptionsFolder
-  .add(planeSettings, "height")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Plane height")
-  .onFinishChange(updateGeometry);
-planeOptionsFolder
-  .add(planeSettings, "width")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Plane width")
-  .onFinishChange(updateGeometry);
-planeOptionsFolder
-  .add(planeSettings, "resolution")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Resolution")
-  .onFinishChange(updateGeometry);
-
-// debug shader controls
 const shaderFolder = gui.addFolder("Terrain");
 shaderFolder
   .add(terrainMaterial.uniforms.uFrequency, "value")
@@ -120,6 +72,59 @@ shaderFolder
   .name("Octave rotation delta");
 shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
 
+// geometry
+const planeSettings = {
+  height: 64,
+  width: 64,
+  resolution: 64,
+};
+
+const updateGeometry = () => {
+  terrain.geometry.dispose();
+  terrainGeometry = new THREE.PlaneGeometry(
+    planeSettings.width,
+    planeSettings.height,
+    planeSettings.resolution,
+    planeSettings.resolution
+  );
+  terrain.geometry = terrainGeometry;
+};
+
+let terrainGeometry = new THREE.PlaneGeometry(
+  planeSettings.width,
+  planeSettings.height,
+  planeSettings.resolution,
+  planeSettings.resolution
+);
+
+const planeOptionsFolder = gui.addFolder("Plane");
+planeOptionsFolder
+  .add(planeSettings, "height")
+  .min(16)
+  .max(256)
+  .step(1)
+  .name("Plane height")
+  .onFinishChange(updateGeometry);
+planeOptionsFolder
+  .add(planeSettings, "width")
+  .min(16)
+  .max(256)
+  .step(1)
+  .name("Plane width")
+  .onFinishChange(updateGeometry);
+planeOptionsFolder
+  .add(planeSettings, "resolution")
+  .min(16)
+  .max(256)
+  .step(1)
+  .name("Resolution")
+  .onFinishChange(updateGeometry);
+
+const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+terrain.rotation.x = -Math.PI / 2;
+
+scene.add(terrain);
+
 // sizes
 const sizes = {
   width: window.innerWidth,
@@ -131,11 +136,11 @@ window.addEventListener("resize", () => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  //update camera
+  // update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  //update render
+  // update render
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 });
