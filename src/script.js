@@ -29,6 +29,7 @@ const terrainMaterial = new THREE.ShaderMaterial({
     uOctaves: { value: 8 },
     uLacunarity: { value: 2.0 },
     uPersistance: { value: 0.5 },
+    uOctaveRotationDelta: { value: 0.0 },
   },
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
@@ -111,6 +112,12 @@ shaderFolder
   .max(0.7)
   .step(0.01)
   .name("Persistance");
+shaderFolder
+  .add(terrainMaterial.uniforms.uOctaveRotationDelta, "value")
+  .min(0.0)
+  .max(3.14)
+  .step(0.1)
+  .name("Octave rotation delta");
 shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
 
 // sizes
