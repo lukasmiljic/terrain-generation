@@ -20,7 +20,6 @@ const planeSettings = {
   resolution: 64,
 };
 
-
 // terrain
 const terrainMaterial = new THREE.ShaderMaterial({
   wireframe: false,
@@ -161,6 +160,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled = true;
+renderer.setClearColor("blue");
 
 const clock = new THREE.Clock();
 
