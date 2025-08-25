@@ -42,7 +42,7 @@ const terrainMaterial = new THREE.ShaderMaterial({
     uAmplitude: { value: 6.0 },
     uOctaves: { value: 8 },
     uLacunarity: { value: 2.0 },
-    uPersistance: { value: 0.5 },
+    uPersistence: { value: 0.5 },
     uOctaveRotationDelta: { value: 0.0 },
   },
   vertexShader: vertexShader,
@@ -81,11 +81,11 @@ shaderFolder
   .step(0.1)
   .name("Lacunarity");
 shaderFolder
-  .add(terrainMaterial.uniforms.uPersistance, "value")
+  .add(terrainMaterial.uniforms.uPersistence, "value")
   .min(0.1)
   .max(0.7)
   .step(0.01)
-  .name("Persistance");
+  .name("Persistence");
 shaderFolder
   .add(terrainMaterial.uniforms.uOctaveRotationDelta, "value")
   .min(0.0)

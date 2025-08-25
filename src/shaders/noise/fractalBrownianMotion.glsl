@@ -4,7 +4,7 @@ uniform float uFrequency;
 uniform float uAmplitude;
 uniform int uOctaves;
 uniform float uLacunarity;
-uniform float uPersistance;
+uniform float uPersistence;
 uniform float uOctaveRotationDelta;
 
 float fractalBrownianMotion(vec2 position) {
@@ -20,7 +20,7 @@ float fractalBrownianMotion(vec2 position) {
   for (int i = 0; i < uOctaves; i++) {
     calculatedValue += psrdnoise(position * currentFrquency, period, currentAngle, gradient) * currentAmplitude;
     currentFrquency *= uLacunarity;
-    currentAmplitude *= uPersistance;
+    currentAmplitude *= uPersistence;
     currentAngle += uOctaveRotationDelta;
   }
 
