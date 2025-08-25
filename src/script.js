@@ -14,48 +14,110 @@ const canvas = document.querySelector("canvas.webgl");
 // scene
 const scene = new THREE.Scene();
 
+/*
+terrain
+*/
+
+// shader based material
+const seedSettings = {
+  seedString: "",
+};
+
+const generateSeed = (userInput) => {
+  if (!userInput) return 0.0;
+
+  let hash = 0x811c9dc5;
+  for (const char of (userInput + userInput.repeat(7)).slice(0, 8)) {
+    hash ^= char.charCodeAt(0);
+    hash = (hash * 0x01000193) >>> 0;
+  }
+  return hash / 4294967295;
+};
+
+const terrainMaterial = new THREE.ShaderMaterial({
+  wireframe: false,
+  uniforms: {
+    uSeed: { value: 0.0 },
+    uFrequency: { value: 0.02 },
+    uAmplitude: { value: 6.0 },
+    uOctaves: { value: 8 },
+    uLacunarity: { value: 2.0 },
+    uPersistence: { value: 0.5 },
+    uOctaveRotationDelta: { value: 0.0 },
+  },
+  vertexShader: vertexShader,
+  fragmentShader: fragmentShader,
+});
+
+const shaderFolder = gui.addFolder("Terrain");
+shaderFolder
+  .add(seedSettings, "seedString")
+  .name("Seed")
+  .onFinishChange((input) => {
+    terrainMaterial.uniforms.uSeed.value = generateSeed(input);
+  });
+shaderFolder
+  .add(terrainMaterial.uniforms.uFrequency, "value")
+  .min(0.01)
+  .max(0.05)
+  .step(0.001)
+  .name("Frequency");
+shaderFolder
+  .add(terrainMaterial.uniforms.uAmplitude, "value")
+  .min(0.1)
+  .max(20.0)
+  .step(0.1)
+  .name("Amplitude");
+shaderFolder
+  .add(terrainMaterial.uniforms.uOctaves, "value")
+  .min(1)
+  .max(8)
+  .step(1)
+  .name("Octaves");
+shaderFolder
+  .add(terrainMaterial.uniforms.uLacunarity, "value")
+  .min(1.0)
+  .max(4.0)
+  .step(0.1)
+  .name("Lacunarity");
+shaderFolder
+  .add(terrainMaterial.uniforms.uPersistence, "value")
+  .min(0.1)
+  .max(0.7)
+  .step(0.01)
+  .name("Persistence");
+shaderFolder
+  .add(terrainMaterial.uniforms.uOctaveRotationDelta, "value")
+  .min(0.0)
+  .max(3.14)
+  .step(0.1)
+  .name("Octave rotation delta");
+shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
+
+// geometry
 const planeSettings = {
   height: 64,
   width: 64,
   resolution: 64,
 };
 
-// material
-const material = new THREE.ShaderMaterial({
-  wireframe: false,
-  uniforms: {
-    uFrequency: { value: 0.02 }, // noise frequency
-    uAmplitude: { value: 6.0 }, // noise amplitude
-    uOctaves: { value: 8 }, // number of octaves for FBM
-    uLacunarity: { value: 2.0 }, // frequency multiplier between octaves
-    uGain: { value: 0.5 }, // amplitude multiplier between octaves
-  },
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
-});
-
-// geometry
-let geometry = new THREE.PlaneGeometry(
-  planeSettings.width,
-  planeSettings.height,
-  planeSettings.resolution,
-  planeSettings.resolution
-);
-const plane = new THREE.Mesh(geometry, material);
-plane.rotation.x = -Math.PI / 2;
-scene.add(plane);
-
-// Function to update geometry when settings change
 const updateGeometry = () => {
-  plane.geometry.dispose(); // Clean up old geometry
-  geometry = new THREE.PlaneGeometry(
+  terrain.geometry.dispose();
+  terrainGeometry = new THREE.PlaneGeometry(
     planeSettings.width,
     planeSettings.height,
     planeSettings.resolution,
     planeSettings.resolution
   );
-  plane.geometry = geometry;
+  terrain.geometry = terrainGeometry;
 };
+
+let terrainGeometry = new THREE.PlaneGeometry(
+  planeSettings.width,
+  planeSettings.height,
+  planeSettings.resolution,
+  planeSettings.resolution
+);
 
 const planeOptionsFolder = gui.addFolder("Plane");
 planeOptionsFolder
@@ -64,55 +126,26 @@ planeOptionsFolder
   .max(256)
   .step(1)
   .name("Plane height")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 planeOptionsFolder
   .add(planeSettings, "width")
   .min(16)
   .max(256)
   .step(1)
   .name("Plane width")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 planeOptionsFolder
   .add(planeSettings, "resolution")
   .min(16)
   .max(256)
   .step(1)
   .name("Resolution")
-  .onChange(updateGeometry);
+  .onFinishChange(updateGeometry);
 
-// Shader uniforms controls
-const shaderFolder = gui.addFolder("Terrain");
-shaderFolder
-  .add(material.uniforms.uFrequency, "value")
-  .min(0.01)
-  .max(0.05)
-  .step(0.001)
-  .name("Frequency");
-shaderFolder
-  .add(material.uniforms.uAmplitude, "value")
-  .min(0.0)
-  .max(20.0)
-  .step(0.1)
-  .name("Amplitude");
-shaderFolder
-  .add(material.uniforms.uOctaves, "value")
-  .min(1)
-  .max(8)
-  .step(1)
-  .name("Octaves");
-shaderFolder
-  .add(material.uniforms.uLacunarity, "value")
-  .min(1.0)
-  .max(4.0)
-  .step(0.1)
-  .name("Lacunarity");
-shaderFolder
-  .add(material.uniforms.uGain, "value")
-  .min(0.1)
-  .max(0.7)
-  .step(0.01)
-  .name("Gain");
-shaderFolder.add(material, "wireframe").name("Wireframe");
+const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+terrain.rotation.x = -Math.PI / 2;
+
+scene.add(terrain);
 
 // sizes
 const sizes = {
@@ -125,11 +158,11 @@ window.addEventListener("resize", () => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  //update camera
+  // update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  //update render
+  // update render
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 });
@@ -161,6 +194,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled = true;
+renderer.setClearColor("blue");
 
 const clock = new THREE.Clock();
 
