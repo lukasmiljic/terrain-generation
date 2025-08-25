@@ -19,9 +19,25 @@ terrain
 */
 
 // shader based material
+const seedSettings = {
+  seedString: "",
+};
+
+const generateSeed = (userInput) => {
+  if (!userInput) return 0.0;
+
+  let hash = 0x811c9dc5;
+  for (const char of (userInput + userInput.repeat(7)).slice(0, 8)) {
+    hash ^= char.charCodeAt(0);
+    hash = (hash * 0x01000193) >>> 0;
+  }
+  return hash / 4294967295;
+};
+
 const terrainMaterial = new THREE.ShaderMaterial({
   wireframe: false,
   uniforms: {
+    uSeed: { value: 0.0 },
     uFrequency: { value: 0.02 },
     uAmplitude: { value: 6.0 },
     uOctaves: { value: 8 },
@@ -34,6 +50,12 @@ const terrainMaterial = new THREE.ShaderMaterial({
 });
 
 const shaderFolder = gui.addFolder("Terrain");
+shaderFolder
+  .add(seedSettings, "seedString")
+  .name("Seed")
+  .onFinishChange((input) => {
+    terrainMaterial.uniforms.uSeed.value = generateSeed(input);
+  });
 shaderFolder
   .add(terrainMaterial.uniforms.uFrequency, "value")
   .min(0.01)
