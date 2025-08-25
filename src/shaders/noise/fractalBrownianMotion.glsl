@@ -6,6 +6,16 @@ uniform int uOctaves;
 uniform float uLacunarity;
 uniform float uPersistence;
 uniform float uOctaveRotationDelta;
+uniform bool uIsRidged;
+
+float convertToRidged(float inputValue) {
+  float maxPossibleValue = uAmplitude * (1.0 - pow(uPersistence, float(uOctaves))) / (1.0 - uPersistence);
+  float normalizedValue = inputValue / maxPossibleValue;
+  normalizedValue = 1.0 - abs(normalizedValue);
+  normalizedValue = pow(max(0.0, normalizedValue), 2.0);
+
+  return normalizedValue * maxPossibleValue - uAmplitude;
+}
 
 float fractalBrownianMotion(vec2 position) {
   float calculatedValue = 0.0;
@@ -22,6 +32,10 @@ float fractalBrownianMotion(vec2 position) {
     currentFrquency *= uLacunarity;
     currentAmplitude *= uPersistence;
     currentAngle += uOctaveRotationDelta;
+  }
+
+  if (uIsRidged == true) {
+    return convertToRidged(calculatedValue);
   }
 
   return calculatedValue;
