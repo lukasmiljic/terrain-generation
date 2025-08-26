@@ -38,6 +38,7 @@ const terrainMaterial = new THREE.ShaderMaterial({
   wireframe: false,
   uniforms: {
     uSeed: { value: 0.0 },
+    uIsRidged: { value: false },
     uFrequency: { value: 0.02 },
     uAmplitude: { value: 6.0 },
     uOctaves: { value: 8 },
@@ -56,6 +57,7 @@ shaderFolder
   .onFinishChange((input) => {
     terrainMaterial.uniforms.uSeed.value = generateSeed(input);
   });
+shaderFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
 shaderFolder
   .add(terrainMaterial.uniforms.uFrequency, "value")
   .min(0.01)
