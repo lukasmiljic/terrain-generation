@@ -3,9 +3,9 @@
 varying float vHeight;
 
 void main() {
-  vec3 pos = position;
-  vHeight = fractalBrownianMotion(pos.xy);
-  pos.z = vHeight;
+  vec3 newPosition = position;
+  vHeight = fractalBrownianMotion(newPosition.xy);
+  newPosition.z = vHeight;
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  csm_Position = newPosition;
 }

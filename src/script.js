@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import GUI from "lil-gui";
 
 import vertexShader from "./shaders/vertex.glsl";
@@ -34,8 +35,8 @@ const generateSeed = (userInput) => {
   return hash / 4294967295;
 };
 
-const terrainMaterial = new THREE.ShaderMaterial({
-  wireframe: false,
+const terrainMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshPhysicalMaterial,
   uniforms: {
     uSeed: { value: 0.0 },
     uIsRidged: { value: false },
@@ -49,6 +50,22 @@ const terrainMaterial = new THREE.ShaderMaterial({
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
 });
+
+// const terrainMaterial = new THREE.ShaderMaterial({
+//   wireframe: false,
+//   uniforms: {
+//     uSeed: { value: 0.0 },
+//     uIsRidged: { value: false },
+//     uFrequency: { value: 0.02 },
+//     uAmplitude: { value: 6.0 },
+//     uOctaves: { value: 8 },
+//     uLacunarity: { value: 2.0 },
+//     uPersistence: { value: 0.5 },
+//     uOctaveRotationDelta: { value: 0.0 },
+//   },
+//   vertexShader: vertexShader,
+//   fragmentShader: fragmentShader,
+// });
 
 const shaderFolder = gui.addFolder("Terrain");
 shaderFolder
