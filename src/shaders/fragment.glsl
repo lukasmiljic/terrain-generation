@@ -13,5 +13,5 @@ void main() {
 
   vec3 color = mix(lowColor, highColor, normalizedHeight);
 
-  csm_FragColor = vec4(color, 1.0);
+  csm_DiffuseColor = vec4(color, 1.0);
 }
