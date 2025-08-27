@@ -356,6 +356,11 @@ source-map-js@^1.2.1:
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
+three-custom-shader-material@^6.3.7:
+  version "6.3.7"
+  resolved "https://registry.yarnpkg.com/three-custom-shader-material/-/three-custom-shader-material-6.3.7.tgz#4ae4d3b394950be229d5f7d8178161be9499778d"
+  integrity sha512-u+REZFLqjCTFgKrBu9nFomwcmLwGkuz//Hk8NezXBnC1rVb+0knyxsoFisoltQRJLg4CoB0pJda9iYItlX4IuQ==
+
 three@^0.179.1:
   version "0.179.1"
   resolved "https://registry.yarnpkg.com/three/-/three-0.179.1.tgz#6c0b43e046eaad0f42b163143517a44ae44ed446"

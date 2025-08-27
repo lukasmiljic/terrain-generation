@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import GUI from "lil-gui";
 
 import vertexShader from "./shaders/vertex.glsl";
@@ -13,6 +14,23 @@ const canvas = document.querySelector("canvas.webgl");
 
 // scene
 const scene = new THREE.Scene();
+
+/**
+ * lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+directionalLight.position.set(15, 20, 0);
+directionalLight.shadow.mapSize.width = 2046;
+directionalLight.shadow.mapSize.height = 2046;
+
+const lightsFolder = gui.addFolder("Lights");
+lightsFolder.add(ambientLight, "visible").name("Ambient light visable:");
+lightsFolder
+  .add(directionalLight, "visible")
+  .name("Directional light visable:");
+scene.add(ambientLight, directionalLight);
 
 /*
 terrain
@@ -34,17 +52,26 @@ const generateSeed = (userInput) => {
   return hash / 4294967295;
 };
 
-const terrainMaterial = new THREE.ShaderMaterial({
-  wireframe: false,
+const planeSettings = {
+  height: 92,
+  width: 92,
+  resolution: 512,
+};
+
+const terrainMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshPhysicalMaterial,
+  // roughness: 0.5,
+  // metalness: 0.5,
   uniforms: {
     uSeed: { value: 0.0 },
     uIsRidged: { value: false },
     uFrequency: { value: 0.02 },
     uAmplitude: { value: 6.0 },
-    uOctaves: { value: 8 },
+    uOctaves: { value: 10 },
     uLacunarity: { value: 2.0 },
     uPersistence: { value: 0.5 },
-    uOctaveRotationDelta: { value: 0.0 },
+    uOctaveRotationDelta: { value: 2.9 },
+    uResolution: { value: planeSettings.resolution },
   },
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
@@ -73,7 +100,7 @@ shaderFolder
 shaderFolder
   .add(terrainMaterial.uniforms.uOctaves, "value")
   .min(1)
-  .max(8)
+  .max(10)
   .step(1)
   .name("Octaves");
 shaderFolder
@@ -97,12 +124,6 @@ shaderFolder
 shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
 
 // geometry
-const planeSettings = {
-  height: 64,
-  width: 64,
-  resolution: 64,
-};
-
 const updateGeometry = () => {
   terrain.geometry.dispose();
   terrainGeometry = new THREE.PlaneGeometry(
@@ -139,7 +160,7 @@ planeOptionsFolder
 planeOptionsFolder
   .add(planeSettings, "resolution")
   .min(16)
-  .max(256)
+  .max(512)
   .step(1)
   .name("Resolution")
   .onFinishChange(updateGeometry);
@@ -196,7 +217,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled = true;
-renderer.setClearColor("blue");
+renderer.setClearColor("black");
 
 const clock = new THREE.Clock();
 
