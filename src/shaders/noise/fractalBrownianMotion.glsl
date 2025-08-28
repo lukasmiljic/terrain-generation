@@ -1,26 +1,27 @@
 #include ./simplex.glsl
 
-uniform float uFrequency;
-uniform float uAmplitude;
+uniform float uScale;
 uniform int uOctaves;
 uniform float uLacunarity;
 uniform float uPersistence;
 uniform float uOctaveRotationDelta;
 uniform bool uIsRidged;
+uniform bool uSharpen;
+
+varying float vHeight;
 
 float convertToRidged(float inputValue) {
-  float maxPossibleValue = uAmplitude * (1.0 - pow(uPersistence, float(uOctaves))) / (1.0 - uPersistence);
-  float normalizedValue = inputValue / maxPossibleValue;
-  normalizedValue = 1.0 - abs(normalizedValue);
-  normalizedValue = pow(max(0.0, normalizedValue), 2.0);
+  return 1.0 - abs(inputValue);
+}
 
-  return normalizedValue * maxPossibleValue - uAmplitude;
+float sharpen(float inputValue) {
+  return pow(max(0.0, inputValue), 2.0);
 }
 
 float fractalBrownianMotion(vec2 position) {
   float calculatedValue = 0.0;
-  float currentAmplitude = uAmplitude;
-  float currentFrquency = uFrequency;
+  float currentAmplitude = 1.0;
+  float currentFrquency = 0.5;
   float currentAngle = 0.0;
 
   // simplex noise related values
@@ -28,15 +29,20 @@ float fractalBrownianMotion(vec2 position) {
   vec2 gradient;
 
   for (int i = 0; i < uOctaves; i++) {
-    calculatedValue += psrdnoise(position * currentFrquency, period, currentAngle, gradient) * currentAmplitude;
+    calculatedValue += psrdnoise(position * currentFrquency * uScale, period, currentAngle, gradient) * currentAmplitude;
     currentFrquency *= uLacunarity;
     currentAmplitude *= uPersistence;
     currentAngle += uOctaveRotationDelta;
   }
 
   if (uIsRidged == true) {
-    return convertToRidged(calculatedValue);
+    calculatedValue = convertToRidged(calculatedValue);
   }
 
-  return calculatedValue;
+  if (uSharpen == true) {
+    calculatedValue = sharpen(calculatedValue);
+  }
+
+  vHeight = calculatedValue;
+  return vHeight;
 }

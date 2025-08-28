@@ -60,12 +60,13 @@ const planeSettings = {
 
 const terrainMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshPhysicalMaterial,
-  // roughness: 0.5,
-  // metalness: 0.5,
+  roughness: 0.45,
+  // metalness: 0.1,
   uniforms: {
     uSeed: { value: 0.0 },
     uIsRidged: { value: false },
-    uFrequency: { value: 0.02 },
+    uSharpen: { value: false },
+    uScale: { value: 0.04 },
     uAmplitude: { value: 6.0 },
     uOctaves: { value: 10 },
     uLacunarity: { value: 2.0 },
@@ -85,12 +86,13 @@ shaderFolder
     terrainMaterial.uniforms.uSeed.value = generateSeed(input);
   });
 shaderFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
+shaderFolder.add(terrainMaterial.uniforms.uSharpen, "value").name("Sharpen");
 shaderFolder
-  .add(terrainMaterial.uniforms.uFrequency, "value")
+  .add(terrainMaterial.uniforms.uScale, "value")
   .min(0.01)
-  .max(0.05)
+  .max(0.1)
   .step(0.001)
-  .name("Frequency");
+  .name("Scale");
 shaderFolder
   .add(terrainMaterial.uniforms.uAmplitude, "value")
   .min(0.1)
