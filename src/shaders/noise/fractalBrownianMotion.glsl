@@ -15,7 +15,7 @@ float convertToRidged(float inputValue) {
 }
 
 float sharpen(float inputValue) {
-  return pow(max(0.0, inputValue), 2.0);
+  return pow(inputValue, 2.0);
 }
 
 float fractalBrownianMotion(vec2 position) {
