@@ -2,6 +2,11 @@
 
 uniform float uResolution;
 uniform float uAmplitude;
+uniform float uSize;
+uniform bool uMask;
+uniform float uMaskFadeStart;
+
+varying vec3 vPosition;
 
 vec3 recalculateNormals(vec2 samplePos, float offset) {
   float hR = fractalBrownianMotion(vec2(samplePos.x + offset, samplePos.y)) * uAmplitude;
@@ -15,14 +20,28 @@ vec3 recalculateNormals(vec2 samplePos, float offset) {
   return normalize(cross(tangentX, tangentY));
 }
 
+float radialMask(vec3 position) {
+  float distanceFromCenter = length(position.xy);
+  float normalizedDistance = pow(distanceFromCenter / (uSize / 2.0), uMaskFadeStart);
+
+  return position.z - normalizedDistance;
+}
+
 void main() {
   vec3 newPosition = position;
-  vHeight = fractalBrownianMotion(newPosition.xy);
-  newPosition.z = vHeight * uAmplitude;
+  newPosition.z = fractalBrownianMotion(newPosition.xy);
+  
+  if (uMask) {
+    vHeight = radialMask(newPosition);
+    newPosition.z = vHeight;
+  }
+
+  newPosition.z *= uAmplitude;
 
   float offset = 1.0 / uResolution * pow(uLacunarity, 2.0) * float(uOctaves);
   vec3 modelNormal = recalculateNormals(newPosition.xy, offset);
 
+  vPosition = newPosition;
   csm_Normal = normalize(modelNormal);
   csm_Position = newPosition;
 }
