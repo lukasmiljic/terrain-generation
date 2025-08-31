@@ -31,7 +31,7 @@ void main() {
   vec3 color = mix(lowColor, highColor, normalizedHeight);
 
   if (uMask) {
-    color = mask(color, vec3(0.0));
+    color = mask(color, vec3(1.0, 0.2, 0.0));
   }
 
   csm_DiffuseColor = vec4(color, 1.0);
