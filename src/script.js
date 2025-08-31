@@ -25,7 +25,7 @@ directionalLight.position.set(15, 20, 0);
 directionalLight.shadow.mapSize.width = 2046;
 directionalLight.shadow.mapSize.height = 2046;
 
-const lightsFolder = gui.addFolder("Lights");
+const lightsFolder = gui.addFolder("Lights").close();
 lightsFolder.add(ambientLight, "visible").name("Ambient light visable:");
 lightsFolder
   .add(directionalLight, "visible")
@@ -35,6 +35,48 @@ scene.add(ambientLight, directionalLight);
 /*
 terrain
 */
+
+// geometry
+const planeSettings = {
+  size: 128,
+  resolution: 512,
+};
+
+const updateGeometry = () => {
+  terrain.geometry.dispose();
+  terrainGeometry = new THREE.PlaneGeometry(
+    planeSettings.size,
+    planeSettings.size,
+    planeSettings.resolution,
+    planeSettings.resolution
+  );
+  terrainMaterial.uniforms.uSize.value = planeSettings.size;
+  terrainMaterial.uniforms.uResolution.value = planeSettings.resolution;
+
+  terrain.geometry = terrainGeometry;
+};
+
+let terrainGeometry = new THREE.PlaneGeometry(
+  planeSettings.size,
+  planeSettings.size,
+  planeSettings.resolution,
+  planeSettings.resolution
+);
+const planeOptionsFolder = gui.addFolder("Plane").close();
+planeOptionsFolder
+  .add(planeSettings, "size")
+  .min(16)
+  .max(256)
+  .step(1)
+  .name("Plane width")
+  .onFinishChange(updateGeometry);
+planeOptionsFolder
+  .add(planeSettings, "resolution")
+  .min(16)
+  .max(512)
+  .step(1)
+  .name("Resolution")
+  .onFinishChange(updateGeometry);
 
 // shader based material
 const seedSettings = {
@@ -52,16 +94,9 @@ const generateSeed = (userInput) => {
   return hash / 4294967295;
 };
 
-const planeSettings = {
-  height: 92,
-  width: 92,
-  resolution: 512,
-};
-
 const terrainMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshPhysicalMaterial,
   roughness: 0.45,
-  // metalness: 0.1,
   uniforms: {
     uSeed: { value: 0.0 },
     uIsRidged: { value: false },
@@ -72,7 +107,12 @@ const terrainMaterial = new CustomShaderMaterial({
     uLacunarity: { value: 2.0 },
     uPersistence: { value: 0.5 },
     uOctaveRotationDelta: { value: 2.9 },
+    uShowNormals: { value: false },
+    uMask: { value: true },
+    uShowMask: { value: true },
+    uMaskFadeStart: { value: 2.0 },
     uResolution: { value: planeSettings.resolution },
+    uSize: { value: planeSettings.size },
   },
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
@@ -123,49 +163,18 @@ shaderFolder
   .max(3.14)
   .step(0.1)
   .name("Octave rotation delta");
+const maskSubfolder = shaderFolder.addFolder("Mask");
+maskSubfolder.add(terrainMaterial.uniforms.uMask, "value").name("Enabled");
+maskSubfolder
+  .add(terrainMaterial.uniforms.uShowMask, "value")
+  .name("Show mask");
+maskSubfolder
+  .add(terrainMaterial.uniforms.uMaskFadeStart, "value")
+  .min(0.1)
+  .max(4)
+  .step(0.1)
+  .name("Mask fade start");
 shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
-
-// geometry
-const updateGeometry = () => {
-  terrain.geometry.dispose();
-  terrainGeometry = new THREE.PlaneGeometry(
-    planeSettings.width,
-    planeSettings.height,
-    planeSettings.resolution,
-    planeSettings.resolution
-  );
-  terrain.geometry = terrainGeometry;
-};
-
-let terrainGeometry = new THREE.PlaneGeometry(
-  planeSettings.width,
-  planeSettings.height,
-  planeSettings.resolution,
-  planeSettings.resolution
-);
-
-const planeOptionsFolder = gui.addFolder("Plane");
-planeOptionsFolder
-  .add(planeSettings, "height")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Plane height")
-  .onFinishChange(updateGeometry);
-planeOptionsFolder
-  .add(planeSettings, "width")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Plane width")
-  .onFinishChange(updateGeometry);
-planeOptionsFolder
-  .add(planeSettings, "resolution")
-  .min(16)
-  .max(512)
-  .step(1)
-  .name("Resolution")
-  .onFinishChange(updateGeometry);
 
 const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
 terrain.rotation.x = -Math.PI / 2;
