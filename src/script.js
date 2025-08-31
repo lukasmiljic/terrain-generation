@@ -15,6 +15,25 @@ const canvas = document.querySelector("canvas.webgl");
 // scene
 const scene = new THREE.Scene();
 
+// fog
+const fogSettings = {
+  enabled: true,
+};
+
+const fog = new THREE.Fog(0xb0cfda, 20, 250);
+scene.fog = fog;
+
+const fogFolder = gui.addFolder("Fog").close();
+fogFolder
+  .add(fogSettings, "enabled")
+  .name("Enabled")
+  .onChange((enabled) => {
+    scene.fog = enabled ? fog : null;
+  });
+fogFolder.add(fog, "near").min(1).max(100).step(1).name("Near distance");
+fogFolder.add(fog, "far").min(50).max(500).step(5).name("Far distance");
+fogFolder.addColor(fog, "color").name("color");
+
 /**
  * lights
  */
