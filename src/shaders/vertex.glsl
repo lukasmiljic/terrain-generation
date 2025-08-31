@@ -30,21 +30,21 @@ float radialMask(vec3 position) {
 }
 
 void main() {
-  vec3 newPosition = position;
-  vec2 offsetPosition = vec2(newPosition.x + uOffsetX, newPosition.y + uOffsetY);
-  newPosition.z = fractalBrownianMotion(offsetPosition);
+  vec3 heightDisplacedPosition = position;
+  vec2 offsetNoiseCoordinates = vec2(heightDisplacedPosition.x + uOffsetX, heightDisplacedPosition.y + uOffsetY);
+  heightDisplacedPosition.z = fractalBrownianMotion(offsetNoiseCoordinates);
 
   if (uMask) {
-    vHeight = radialMask(newPosition);
-    newPosition.z = vHeight;
+    vHeight = radialMask(heightDisplacedPosition);
+    heightDisplacedPosition.z = vHeight;
   }
 
-  newPosition.z *= uAmplitude;
+  heightDisplacedPosition.z *= uAmplitude;
 
   float normalsCalculationOffset = 1.0 / uResolution * pow(uLacunarity, 2.0) * float(uOctaves);
-  vec3 modelNormal = recalculateNormals(offsetPosition.xy, normalsCalculationOffset);
+  vec3 modelNormal = recalculateNormals(offsetNoiseCoordinates.xy, normalsCalculationOffset);
 
-  vPosition = newPosition;
+  vPosition = heightDisplacedPosition;
   csm_Normal = normalize(modelNormal);
-  csm_Position = newPosition;
+  csm_Position = heightDisplacedPosition;
 }
