@@ -36,42 +36,84 @@ scene.add(ambientLight, directionalLight);
 terrain
 */
 
-// geometry
-const planeSettings = {
-  size: 128,
-  resolution: 512,
+const terrainParams = {
+  geometry: {
+    size: 128,
+    resolution: 512,
+  },
+  noise: {
+    seed: "",
+    scale: 0.04,
+    amplitude: 6.0,
+    scale: 0.04,
+    ridged: false,
+    sharpen: false,
+    octaves: 10,
+    lacunarity: 2.0,
+    persistence: 0.5,
+    octaveRotationDelta: 2.9,
+  },
+  mask: {
+    enabled: true,
+    fadeStart: 2.0,
+    highlight: true,
+  },
+  debug: {
+    wireframe: false,
+    normals: false,
+  },
 };
 
+const uniforms = {
+  uSeed: { value: terrainParams.noise.seed },
+  uIsRidged: { value: terrainParams.noise.ridged },
+  uSharpen: { value: terrainParams.noise.sharpen },
+  uScale: { value: terrainParams.noise.scale },
+  uAmplitude: { value: terrainParams.noise.amplitude },
+  uOctaves: { value: terrainParams.noise.octaves },
+  uLacunarity: { value: terrainParams.noise.lacunarity },
+  uPersistence: { value: terrainParams.noise.persistence },
+  uOctaveRotationDelta: { value: terrainParams.noise.octaveRotationDelta },
+  uShowNormals: { value: terrainParams.debug.normals },
+  uMask: { value: terrainParams.mask.enabled },
+  uShowMask: { value: terrainParams.mask.highlight },
+  uMaskFadeStart: { value: terrainParams.mask.fadeStart },
+  uResolution: { value: terrainParams.geometry.resolution },
+  uSize: { value: terrainParams.geometry.size },
+};
+
+// geometry
 const updateGeometry = () => {
   terrain.geometry.dispose();
   terrainGeometry = new THREE.PlaneGeometry(
-    planeSettings.size,
-    planeSettings.size,
-    planeSettings.resolution,
-    planeSettings.resolution
+    terrainParams.geometry.size,
+    terrainParams.geometry.size,
+    terrainParams.geometry.resolution,
+    terrainParams.geometry.resolution
   );
-  terrainMaterial.uniforms.uSize.value = planeSettings.size;
-  terrainMaterial.uniforms.uResolution.value = planeSettings.resolution;
+  terrainMaterial.uniforms.uSize.value = terrainParams.geometry.size;
+  terrainMaterial.uniforms.uResolution.value =
+    terrainParams.geometry.resolution;
 
   terrain.geometry = terrainGeometry;
 };
 
 let terrainGeometry = new THREE.PlaneGeometry(
-  planeSettings.size,
-  planeSettings.size,
-  planeSettings.resolution,
-  planeSettings.resolution
+  terrainParams.geometry.size,
+  terrainParams.geometry.size,
+  terrainParams.geometry.resolution,
+  terrainParams.geometry.resolution
 );
 const planeOptionsFolder = gui.addFolder("Plane").close();
 planeOptionsFolder
-  .add(planeSettings, "size")
+  .add(terrainParams.geometry, "size")
   .min(16)
   .max(256)
   .step(1)
   .name("Plane width")
   .onFinishChange(updateGeometry);
 planeOptionsFolder
-  .add(planeSettings, "resolution")
+  .add(terrainParams.geometry, "resolution")
   .min(16)
   .max(512)
   .step(1)
@@ -94,26 +136,16 @@ const generateSeed = (userInput) => {
   return hash / 4294967295;
 };
 
+const normalMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshNormalMaterial,
+  uniforms: uniforms,
+  vertexShader: vertexShader,
+});
+
 const terrainMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshPhysicalMaterial,
   roughness: 0.45,
-  uniforms: {
-    uSeed: { value: 0.0 },
-    uIsRidged: { value: false },
-    uSharpen: { value: false },
-    uScale: { value: 0.04 },
-    uAmplitude: { value: 6.0 },
-    uOctaves: { value: 10 },
-    uLacunarity: { value: 2.0 },
-    uPersistence: { value: 0.5 },
-    uOctaveRotationDelta: { value: 2.9 },
-    uShowNormals: { value: false },
-    uMask: { value: true },
-    uShowMask: { value: true },
-    uMaskFadeStart: { value: 2.0 },
-    uResolution: { value: planeSettings.resolution },
-    uSize: { value: planeSettings.size },
-  },
+  uniforms: uniforms,
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
 });
@@ -175,6 +207,12 @@ maskSubfolder
   .step(0.1)
   .name("Mask fade start");
 shaderFolder.add(terrainMaterial, "wireframe").name("Wireframe");
+shaderFolder
+  .add(terrainParams.debug, "normals")
+  .name("Show normals")
+  .onChange((showNormals) => {
+    terrain.material = showNormals ? normalMaterial : terrainMaterial;
+  });
 
 const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
 terrain.rotation.x = -Math.PI / 2;
