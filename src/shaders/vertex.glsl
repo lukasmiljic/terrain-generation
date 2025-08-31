@@ -1,5 +1,7 @@
 #include ./noise/fractalBrownianMotion.glsl
 
+uniform float uOffsetX;
+uniform float uOffsetY;
 uniform float uResolution;
 uniform float uAmplitude;
 uniform float uSize;
@@ -28,20 +30,21 @@ float radialMask(vec3 position) {
 }
 
 void main() {
-  vec3 newPosition = position;
-  newPosition.z = fractalBrownianMotion(newPosition.xy);
-  
+  vec3 heightDisplacedPosition = position;
+  vec2 offsetNoiseCoordinates = vec2(heightDisplacedPosition.x + uOffsetX, heightDisplacedPosition.y + uOffsetY);
+  heightDisplacedPosition.z = fractalBrownianMotion(offsetNoiseCoordinates);
+
   if (uMask) {
-    vHeight = radialMask(newPosition);
-    newPosition.z = vHeight;
+    vHeight = radialMask(heightDisplacedPosition);
+    heightDisplacedPosition.z = vHeight;
   }
 
-  newPosition.z *= uAmplitude;
+  heightDisplacedPosition.z *= uAmplitude;
 
-  float offset = 1.0 / uResolution * pow(uLacunarity, 2.0) * float(uOctaves);
-  vec3 modelNormal = recalculateNormals(newPosition.xy, offset);
+  float normalsCalculationOffset = 1.0 / uResolution * pow(uLacunarity, 2.0) * float(uOctaves);
+  vec3 modelNormal = recalculateNormals(offsetNoiseCoordinates.xy, normalsCalculationOffset);
 
-  vPosition = newPosition;
+  vPosition = heightDisplacedPosition;
   csm_Normal = normalize(modelNormal);
-  csm_Position = newPosition;
+  csm_Position = heightDisplacedPosition;
 }
