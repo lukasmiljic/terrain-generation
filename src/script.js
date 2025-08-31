@@ -45,7 +45,8 @@ const terrainParams = {
     seed: "",
     scale: 0.04,
     amplitude: 6.0,
-    scale: 0.04,
+    offsetX: 0.0,
+    offsetY: 0.0,
     ridged: false,
     sharpen: false,
     octaves: 10,
@@ -66,10 +67,12 @@ const terrainParams = {
 
 const uniforms = {
   uSeed: { value: terrainParams.noise.seed },
-  uIsRidged: { value: terrainParams.noise.ridged },
-  uSharpen: { value: terrainParams.noise.sharpen },
   uScale: { value: terrainParams.noise.scale },
   uAmplitude: { value: terrainParams.noise.amplitude },
+  uOffsetX: { value: terrainParams.noise.offsetX },
+  uOffsetY: { value: terrainParams.noise.offsetY },
+  uIsRidged: { value: terrainParams.noise.ridged },
+  uSharpen: { value: terrainParams.noise.sharpen },
   uOctaves: { value: terrainParams.noise.octaves },
   uLacunarity: { value: terrainParams.noise.lacunarity },
   uPersistence: { value: terrainParams.noise.persistence },
@@ -171,6 +174,19 @@ shaderFolder
   .max(20.0)
   .step(0.1)
   .name("Amplitude");
+const offsetSubfolder = shaderFolder.addFolder("Offset");
+offsetSubfolder
+  .add(terrainMaterial.uniforms.uOffsetX, "value")
+  .min(-1024)
+  .max(1024)
+  .step(1)
+  .name("X");
+offsetSubfolder
+  .add(terrainMaterial.uniforms.uOffsetY, "value")
+  .min(-1024)
+  .max(1024)
+  .step(1)
+  .name("Y");
 shaderFolder
   .add(terrainMaterial.uniforms.uOctaves, "value")
   .min(1)
