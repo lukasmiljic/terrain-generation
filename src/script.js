@@ -5,6 +5,8 @@ import GUI from "lil-gui";
 
 import vertexShader from "./shaders/vertex.glsl";
 import fragmentShader from "./shaders/fragment.glsl";
+import skyVertexShader from "./shaders/sky/skyVertex.glsl";
+import skyFragmentShader from "./shaders/sky/skyFragment.glsl";
 
 // debug
 const gui = new GUI();
@@ -20,7 +22,7 @@ const fogSettings = {
   enabled: true,
 };
 
-const fog = new THREE.Fog(0xb0cfda, 20, 250);
+const fog = new THREE.Fog(0xc6d9d3, 10, 230);
 scene.fog = fog;
 
 const fogFolder = gui.addFolder("Fog").close();
@@ -37,7 +39,7 @@ fogFolder.addColor(fog, "color").name("color");
 /**
  * lights
  */
-const ambientLight = new THREE.AmbientLight(0x756bd1, 0.35);
+const ambientLight = new THREE.AmbientLight(0x0056b4, 0.35);
 
 const directionalLight = new THREE.DirectionalLight(0xf2a629, 1.5);
 directionalLight.position.set(20, 10, -10);
@@ -288,6 +290,22 @@ terrain.rotation.x = -Math.PI / 2;
 
 scene.add(terrain);
 
+// sky sphere
+const skyGeometry = new THREE.SphereGeometry(100, 32, 32);
+const skyMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshBasicMaterial,
+  side: THREE.BackSide,
+  fog: false,
+  vertexShader: skyVertexShader,
+  fragmentShader: skyFragmentShader,
+});
+const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+
+const skyFolder = gui.addFolder("Sky").close();
+skyFolder.add(sky, "visible").name("Enable");
+
+scene.add(sky);
+
 // sizes
 const sizes = {
   width: window.innerWidth,
@@ -325,7 +343,7 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
-controls.maxPolarAngle = Math.PI * 0.5 -  THREE.MathUtils.degToRad(15);
+controls.maxPolarAngle = THREE.MathUtils.degToRad(75);
 controls.minDistance = 50;
 controls.maxDistance = 100;
 controls.enablePan = false;
