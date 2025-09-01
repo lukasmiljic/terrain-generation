@@ -5,9 +5,46 @@ uniform float uSize;
 uniform bool uMask;
 uniform bool uShowMask;
 uniform float uMaskFadeStart;
+uniform vec3 uColorsLow[4];
+uniform vec3 uColorsHigh[4];
+uniform float uStops[4];
+uniform float uSlopeThreshold;
+uniform float uSlopeBlend;
 
 varying float vHeight;
 varying vec3 vPosition;
+varying vec3 vUV;
+
+int findColorIndex(float height) {
+  for (int i = 0; i < 4 - 1; i++) {
+    if (height <= uStops[i + 1]) {
+      return i;
+    }
+  }
+  return 2;
+}
+
+vec3 getHeightColor(float height, bool isHighSlope) {
+  int index = findColorIndex(height);
+  float t = (height - uStops[index]) / (uStops[index + 1] - uStops[index]);
+
+  if (isHighSlope) {
+    return mix(uColorsHigh[index], uColorsHigh[index + 1], t);
+  } else {
+    return mix(uColorsLow[index], uColorsLow[index + 1], t);
+  }
+}
+
+vec3 getSlopeBlendedColor(float height, float slope) {
+  float slopeFactor = 1.0 - abs(vUV.z);
+
+  float slopeBlendAmount = smoothstep(uSlopeThreshold - uSlopeBlend, uSlopeThreshold + uSlopeBlend, slopeFactor);
+
+  vec3 lowSlopeColor = getHeightColor(height, false);
+  vec3 highSlopeColor = getHeightColor(height, true);
+
+  return mix(lowSlopeColor, highSlopeColor, slopeBlendAmount);
+}
 
 vec3 mask(vec3 inputColor, vec3 maskColor) {
   if (!uShowMask) {
@@ -23,12 +60,10 @@ vec3 mask(vec3 inputColor, vec3 maskColor) {
 }
 
 void main() {
-  vec3 lowColor = vec3(0.2);
-  vec3 highColor = vec3(1.0);
-
   float normalizedHeight = (vHeight + 1.0) / 2.0;
+  float slope = 1.0 - abs(vUV.z);
 
-  vec3 color = mix(lowColor, highColor, normalizedHeight);
+  vec3 color = getSlopeBlendedColor(normalizedHeight, slope);
 
   if (uMask) {
     color = mask(color, vec3(1.0, 0.2, 0.0));

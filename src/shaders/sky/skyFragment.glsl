@@ -1,9 +1,9 @@
 varying vec3 vWorldPosition;
 
-void main() {
-  vec3 baseColor = vec3(0.02, 0.66, 0.73);
-  vec3 highColor = vec3(1.0, 1.0, 0.55);
+uniform vec3 baseColor;
+uniform vec3 highColor;
 
+void main() {
   float height = pow((normalize(vWorldPosition).y + 1.0) * 0.5, 1.7);
   vec3 color = mix(highColor, baseColor, height);
 
