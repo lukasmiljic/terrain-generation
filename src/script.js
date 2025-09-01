@@ -110,7 +110,7 @@ const terrainParams = {
   mask: {
     enabled: true,
     fadeStart: 2.0,
-    highlight: true,
+    highlight: false,
   },
   debug: {
     wireframe: false,
