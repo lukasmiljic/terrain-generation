@@ -317,7 +317,7 @@ canvas.addEventListener("dblclick", () => {
 });
 
 // camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
+const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height);
 camera.position.set(50, 20, 20);
 scene.add(camera);
 
@@ -325,6 +325,10 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
+controls.maxPolarAngle = Math.PI * 0.5 -  THREE.MathUtils.degToRad(15);
+controls.minDistance = 50;
+controls.maxDistance = 100;
+controls.enablePan = false;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
