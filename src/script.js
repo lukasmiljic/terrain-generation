@@ -37,18 +37,52 @@ fogFolder.addColor(fog, "color").name("color");
 /**
  * lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+const ambientLight = new THREE.AmbientLight(0x756bd1, 0.35);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-directionalLight.position.set(15, 20, 0);
+const directionalLight = new THREE.DirectionalLight(0xf2a629, 1.5);
+directionalLight.position.set(20, 10, -10);
 directionalLight.shadow.mapSize.width = 2046;
 directionalLight.shadow.mapSize.height = 2046;
 
 const lightsFolder = gui.addFolder("Lights").close();
-lightsFolder.add(ambientLight, "visible").name("Ambient light visable:");
-lightsFolder
-  .add(directionalLight, "visible")
-  .name("Directional light visable:");
+const ambientFolder = lightsFolder.addFolder("Ambient Light");
+ambientFolder.add(ambientLight, "visible").name("Enabled");
+ambientFolder
+  .add(ambientLight, "intensity")
+  .min(0)
+  .max(2)
+  .step(0.01)
+  .name("Intensity");
+ambientFolder.addColor(ambientLight, "color").name("Color");
+const directionalFolder = lightsFolder.addFolder("Directional Light");
+directionalFolder.add(directionalLight, "visible").name("Enabled");
+directionalFolder
+  .add(directionalLight, "intensity")
+  .min(0)
+  .max(5)
+  .step(0.1)
+  .name("Intensity");
+directionalFolder.addColor(directionalLight, "color").name("Color");
+const lightPositionFolder = directionalFolder.addFolder("Position");
+lightPositionFolder
+  .add(directionalLight.position, "x")
+  .min(-50)
+  .max(50)
+  .step(1)
+  .name("X");
+lightPositionFolder
+  .add(directionalLight.position, "y")
+  .min(1)
+  .max(100)
+  .step(1)
+  .name("Y");
+lightPositionFolder
+  .add(directionalLight.position, "z")
+  .min(-50)
+  .max(50)
+  .step(1)
+  .name("Z");
+
 scene.add(ambientLight, directionalLight);
 
 /*
@@ -58,7 +92,7 @@ terrain
 const terrainParams = {
   geometry: {
     size: 128,
-    resolution: 512,
+    resolution: 800,
   },
   noise: {
     seed: "",
@@ -76,7 +110,7 @@ const terrainParams = {
   mask: {
     enabled: true,
     fadeStart: 2.0,
-    highlight: true,
+    highlight: false,
   },
   debug: {
     wireframe: false,
@@ -137,7 +171,7 @@ planeOptionsFolder
 planeOptionsFolder
   .add(terrainParams.geometry, "resolution")
   .min(16)
-  .max(512)
+  .max(1024)
   .step(1)
   .name("Resolution")
   .onFinishChange(updateGeometry);
@@ -283,7 +317,7 @@ canvas.addEventListener("dblclick", () => {
 });
 
 // camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
+const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height);
 camera.position.set(50, 20, 20);
 scene.add(camera);
 
@@ -291,6 +325,10 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
+controls.maxPolarAngle = Math.PI * 0.5 -  THREE.MathUtils.degToRad(15);
+controls.minDistance = 50;
+controls.maxDistance = 100;
+controls.enablePan = false;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
