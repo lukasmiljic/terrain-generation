@@ -92,7 +92,7 @@ terrain
 const terrainParams = {
   geometry: {
     size: 128,
-    resolution: 512,
+    resolution: 800,
   },
   noise: {
     seed: "",
@@ -171,7 +171,7 @@ planeOptionsFolder
 planeOptionsFolder
   .add(terrainParams.geometry, "resolution")
   .min(16)
-  .max(512)
+  .max(1024)
   .step(1)
   .name("Resolution")
   .onFinishChange(updateGeometry);
