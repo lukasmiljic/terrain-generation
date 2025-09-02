@@ -75,7 +75,7 @@ vec3 mask(vec3 inputColor, vec3 maskColor) {
 }
 
 void main() {
-  float normalizedHeight = (vHeight + 1.0) / 2.5;
+  float normalizedHeight = (vHeight + 1.0) / 2.0;
 
   vec3 color = getSlopeBlendedColor(normalizedHeight);
 
