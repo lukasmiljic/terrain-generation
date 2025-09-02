@@ -80,7 +80,7 @@ const colorStops = [
   {
     position: 0.24,
     colorLow: [0.7529, 0.9098, 0.3804],
-    colorHigh: [0.7137, 1.0, 0.0],
+    colorHigh: [0.7804, 0.7608, 0.4235],
   },
   {
     position: 0.4,
