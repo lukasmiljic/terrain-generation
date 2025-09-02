@@ -9,6 +9,7 @@ uniform bool uMask;
 uniform float uMaskFadeStart;
 
 varying vec3 vPosition;
+varying vec3 vModelNormal;
 
 vec3 recalculateNormals(vec2 samplePos, float offset) {
   float hR = fractalBrownianMotion(vec2(samplePos.x + offset, samplePos.y)) * uAmplitude;
@@ -45,6 +46,7 @@ void main() {
   vec3 modelNormal = recalculateNormals(offsetNoiseCoordinates.xy, normalsCalculationOffset);
 
   vPosition = heightDisplacedPosition;
+  vModelNormal = normalize(modelNormal);
   csm_Normal = normalize(modelNormal);
   csm_Position = heightDisplacedPosition;
 }
