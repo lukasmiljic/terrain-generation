@@ -19,8 +19,8 @@ const scene = new THREE.Scene();
 
 // Sky colors
 const skyColors = {
-  baseColor: [0.78, 0.85, 0.9], // Horizon color (light blue-gray)
-  highColor: [0.2, 0.4, 0.8], // Zenith color (deep blue)
+  baseColor: [0.051, 0.4706, 0.8902],
+  highColor: [0.5882, 0.7686, 0.100],
 };
 
 // fog
