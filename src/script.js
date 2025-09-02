@@ -295,7 +295,7 @@ const updateColorUniforms = () => {
     (stop) => stop.position
   );
 };
-const terrainColorsFolder = gui.addFolder("Terrain colors");
+const terrainColorsFolder = gui.addFolder("Terrain colors").close();
 
 // Slope blending controls
 const slopeBlendingFolder = terrainColorsFolder.addFolder("Slope blending");
@@ -311,7 +311,7 @@ slopeBlendingFolder
   .max(1)
   .step(0.01)
   .name("Slope blend");
-const colorStopsFolder = terrainColorsFolder.addFolder("Color stops").close();
+const colorStopsFolder = terrainColorsFolder.addFolder("Color stops");
 colorStops.forEach((stop, index) => {
   const colorStopFolder = colorStopsFolder.addFolder(`Color stop ${index + 1}`);
   colorStopFolder.addColor(stop, "colorLow").onChange(updateColorUniforms);
