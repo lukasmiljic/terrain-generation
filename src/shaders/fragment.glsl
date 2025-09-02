@@ -13,7 +13,7 @@ uniform float uSlopeBlend;
 
 varying float vHeight;
 varying vec3 vPosition;
-varying vec3 vUV;
+varying vec3 vModelNormal;
 
 int findColorIndex(float height) {
   for (int i = 0; i < 4 - 1; i++) {
@@ -36,7 +36,7 @@ vec3 getHeightColor(float height, bool isHighSlope) {
 }
 
 vec3 getSlopeBlendedColor(float height, float slope) {
-  float slopeFactor = 1.0 - abs(vUV.z);
+  float slopeFactor = 1.0 - abs(vModelNormal.z);
 
   float slopeBlendAmount = smoothstep(uSlopeThreshold - uSlopeBlend, uSlopeThreshold + uSlopeBlend, slopeFactor);
 
@@ -61,7 +61,7 @@ vec3 mask(vec3 inputColor, vec3 maskColor) {
 
 void main() {
   float normalizedHeight = (vHeight + 1.0) / 2.0;
-  float slope = 1.0 - abs(vUV.z);
+  float slope = 1.0 - abs(vModelNormal.z);
 
   vec3 color = getSlopeBlendedColor(normalizedHeight, slope);
 
