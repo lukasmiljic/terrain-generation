@@ -20,7 +20,7 @@ const scene = new THREE.Scene();
 // Sky colors
 const skyColors = {
   baseColor: [0.051, 0.4706, 0.8902],
-  highColor: [0.5882, 0.7686, 0.100],
+  highColor: [0.7529, 0.6, 0.2078],
 };
 
 // fog
@@ -34,7 +34,7 @@ scene.fog = fog;
 /**
  * lights
  */
-const ambientLight = new THREE.AmbientLight(0x0056b4, 0.35);
+const ambientLight = new THREE.AmbientLight(0x3d4e9e, 0.35);
 
 const directionalLight = new THREE.DirectionalLight(0xf2a629, 1.5);
 directionalLight.position.set(20, 10, -10);
@@ -95,7 +95,7 @@ const colorStops = [
   {
     position: 1.0,
     colorLow: [1.0, 1.0, 1.0],
-    colorHigh: [0.4314, 0.3255, 0.2824],
+    colorHigh: [0.498, 0.5725, 0.7333],
   },
 ];
 
