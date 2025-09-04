@@ -43,6 +43,20 @@ directionalLight.shadow.mapSize.height = 2046;
 
 scene.add(ambientLight, directionalLight);
 
+// water
+const waterMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshBasicMaterial,
+  color: 0x0074cc,
+});
+
+const waterGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
+
+const water = new THREE.Mesh(waterGeometry, waterMaterial);
+water.rotation.x = -Math.PI / 2;
+water.position.y = -8;
+
+scene.add(water);
+
 /*
 terrain
 */
@@ -327,6 +341,10 @@ colorStops.forEach((stop, index) => {
     .onChange(updateColorUniforms);
 });
 
+const waterFolder = gui.addFolder("Water");
+waterFolder.add(water, "visible").name("Enabled");
+waterFolder.add(water.position, "y").name("Height").min(-10).max(10);
+
 const planeOptionsFolder = gui.addFolder("Plane").close();
 planeOptionsFolder
   .add(terrainParams.geometry, "size")
@@ -343,28 +361,28 @@ planeOptionsFolder
   .name("Resolution")
   .onFinishChange(updateGeometry);
 
-const shaderFolder = gui.addFolder("Terrain");
-shaderFolder
+const terrainFolder = gui.addFolder("Terrain");
+terrainFolder
   .add(seedSettings, "seedString")
   .name("Seed")
   .onFinishChange((input) => {
     terrainMaterial.uniforms.uSeed.value = generateSeed(input);
   });
-shaderFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
-shaderFolder.add(terrainMaterial.uniforms.uSharpen, "value").name("Sharpen");
-shaderFolder
+terrainFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
+terrainFolder.add(terrainMaterial.uniforms.uSharpen, "value").name("Sharpen");
+terrainFolder
   .add(terrainMaterial.uniforms.uScale, "value")
   .min(0.01)
   .max(0.1)
   .step(0.001)
   .name("Scale");
-shaderFolder
+terrainFolder
   .add(terrainMaterial.uniforms.uAmplitude, "value")
   .min(0.1)
   .max(20.0)
   .step(0.1)
   .name("Amplitude");
-const offsetSubfolder = shaderFolder.addFolder("Offset").close();
+const offsetSubfolder = terrainFolder.addFolder("Offset").close();
 offsetSubfolder
   .add(terrainMaterial.uniforms.uOffsetX, "value")
   .min(-1024)
@@ -377,7 +395,7 @@ offsetSubfolder
   .max(1024)
   .step(1)
   .name("Y");
-const fbmSubfolder = shaderFolder.addFolder("Fractal Brownian Motion").close();
+const fbmSubfolder = terrainFolder.addFolder("Fractal Brownian Motion").close();
 fbmSubfolder
   .add(terrainMaterial.uniforms.uOctaves, "value")
   .min(1)
@@ -402,7 +420,7 @@ fbmSubfolder
   .max(3.14)
   .step(0.1)
   .name("Octave rotation delta");
-const maskSubfolder = shaderFolder.addFolder("Mask").close();
+const maskSubfolder = terrainFolder.addFolder("Mask").close();
 maskSubfolder.add(terrainMaterial.uniforms.uMask, "value").name("Enabled");
 maskSubfolder
   .add(terrainMaterial.uniforms.uShowMask, "value")
@@ -413,7 +431,7 @@ maskSubfolder
   .max(4)
   .step(0.1)
   .name("Mask fade start");
-const debugSubfolder = shaderFolder.addFolder("Debug").close();
+const debugSubfolder = terrainFolder.addFolder("Debug").close();
 debugSubfolder.add(terrainMaterial, "wireframe").name("Wireframe");
 debugSubfolder
   .add(terrainParams.debug, "normals")
