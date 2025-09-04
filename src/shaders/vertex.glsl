@@ -7,6 +7,7 @@ uniform float uAmplitude;
 uniform float uSize;
 uniform bool uMask;
 uniform float uMaskFadeStart;
+uniform bool uFlatten;
 
 varying vec3 vPosition;
 varying vec3 vModelNormal;
@@ -44,6 +45,10 @@ void main() {
 
   float normalsCalculationOffset = 1.0 / uResolution * pow(uLacunarity, 2.0) * float(uOctaves);
   vec3 modelNormal = recalculateNormals(offsetNoiseCoordinates.xy, normalsCalculationOffset);
+
+  if (uFlatten) {
+    heightDisplacedPosition.z = 1.0;
+  }
 
   vPosition = heightDisplacedPosition;
   vModelNormal = normalize(modelNormal);

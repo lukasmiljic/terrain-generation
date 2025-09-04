@@ -126,6 +126,8 @@ const uniforms = {
     value: colorStops.map((stop) => new THREE.Vector3(...stop.colorHigh)),
   },
   uStops: { value: colorStops.map((stop) => stop.position) },
+  uFlatten: { value: false },
+  uColors: { value: true },
 };
 
 // geometry
@@ -419,6 +421,10 @@ debugSubfolder
   .onChange((showNormals) => {
     terrain.material = showNormals ? normalMaterial : terrainMaterial;
   });
+debugSubfolder.add(terrainMaterial.uniforms.uFlatten, "value").name("Flatten");
+debugSubfolder
+  .add(terrainMaterial.uniforms.uColors, "value")
+  .name("Colorize terrain");
 
 // sizes
 const sizes = {

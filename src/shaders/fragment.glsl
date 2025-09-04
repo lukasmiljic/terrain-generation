@@ -12,6 +12,7 @@ uniform vec3 uColorsHigh[COLOR_STOPS_COUNT];
 uniform float uStops[COLOR_STOPS_COUNT];
 uniform float uSlopeThreshold;
 uniform float uSlopeBlend;
+uniform bool uColors;
 
 varying float vHeight;
 varying vec3 vPosition;
@@ -76,8 +77,13 @@ vec3 mask(vec3 inputColor, vec3 maskColor) {
 
 void main() {
   float normalizedHeight = (vHeight + 1.0) / 2.0;
+  vec3 color;
 
-  vec3 color = getSlopeBlendedColor(normalizedHeight);
+  if (uColors) {
+    color = getSlopeBlendedColor(normalizedHeight);
+  } else {
+    color = vec3(mix(0.1, 1.0, normalizedHeight));
+  }
 
   if (uMask) {
     color = mask(color, vec3(1.0, 0.2, 0.0));
