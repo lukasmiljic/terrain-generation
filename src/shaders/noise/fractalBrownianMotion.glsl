@@ -8,8 +8,6 @@ uniform float uOctaveRotationDelta;
 uniform bool uIsRidged;
 uniform bool uSharpen;
 
-varying float vHeight;
-
 float convertToRidged(float inputValue) {
   return 1.0 - abs(inputValue);
 }
@@ -43,6 +41,5 @@ float fractalBrownianMotion(vec2 position) {
     calculatedValue = sharpen(calculatedValue);
   }
 
-  vHeight = calculatedValue;
-  return vHeight;
+  return calculatedValue;
 }
