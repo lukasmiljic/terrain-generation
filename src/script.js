@@ -327,36 +327,6 @@ const updateColorUniforms = () => {
     (stop) => stop.position
   );
 };
-const terrainColorsFolder = gui.addFolder("Terrain colors").close();
-
-// Slope blending controls
-const slopeBlendingFolder = terrainColorsFolder.addFolder("Slope blending");
-slopeBlendingFolder
-  .add(terrainMaterial.uniforms.uSlopeThreshold, "value")
-  .min(0)
-  .max(1)
-  .step(0.01)
-  .name("Slope threshold");
-slopeBlendingFolder
-  .add(terrainMaterial.uniforms.uSlopeBlend, "value")
-  .min(0)
-  .max(1)
-  .step(0.01)
-  .name("Slope blend");
-const colorStopsFolder = terrainColorsFolder.addFolder("Color stops");
-colorStops.forEach((stop, index) => {
-  const colorStopFolder = colorStopsFolder.addFolder(`Color stop ${index + 1}`);
-  colorStopFolder.addColor(stop, "colorLow").onChange(updateColorUniforms);
-  colorStopFolder.addColor(stop, "colorHigh").onChange(updateColorUniforms);
-  colorStopFolder
-    .add(stop, "position")
-    .min(0)
-    .max(1)
-    .step(0.01)
-    .name("Height")
-    .onChange(updateColorUniforms);
-});
-
 const waterFolder = gui.addFolder("Water").close();
 waterFolder.add(water, "visible").name("Enabled");
 waterFolder.add(water.position, "y").name("Height").min(-10).max(10);
@@ -425,6 +395,33 @@ planeOptionsFolder
   .onFinishChange(updateGeometry);
 
 const terrainFolder = gui.addFolder("Terrain");
+const terrainColorsFolder = terrainFolder.addFolder("Terrain colors").close();
+const slopeBlendingFolder = terrainColorsFolder.addFolder("Slope blending");
+slopeBlendingFolder
+  .add(terrainMaterial.uniforms.uSlopeThreshold, "value")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .name("Slope threshold");
+slopeBlendingFolder
+  .add(terrainMaterial.uniforms.uSlopeBlend, "value")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .name("Slope blend");
+const colorStopsFolder = terrainColorsFolder.addFolder("Color stops");
+colorStops.forEach((stop, index) => {
+  const colorStopFolder = colorStopsFolder.addFolder(`Color stop ${index + 1}`);
+  colorStopFolder.addColor(stop, "colorLow").onChange(updateColorUniforms);
+  colorStopFolder.addColor(stop, "colorHigh").onChange(updateColorUniforms);
+  colorStopFolder
+    .add(stop, "position")
+    .min(0)
+    .max(1)
+    .step(0.01)
+    .name("Height")
+    .onChange(updateColorUniforms);
+});
 terrainFolder
   .add(seedSettings, "seedString")
   .name("Seed")
