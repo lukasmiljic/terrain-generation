@@ -48,7 +48,6 @@ scene.add(ambientLight, directionalLight);
 // water
 const waterColors = {
   waterColor: [0.0, 0.2, 1.0],
-  horizonColor: [...skyColors.horizonColor],
 };
 
 const waterMaterial = new CustomShaderMaterial({
@@ -65,12 +64,16 @@ const waterMaterial = new CustomShaderMaterial({
     uOpacityFadeStart: { value: 45.0 },
     uBlendWidth: { value: 20.0 },
     uOpacity: { value: 0.75 },
+    uTime: { value: 0.0 },
+    uWaveAmplitude: { value: 0.2 },
+    uWaveSpeed: { value: 2.0 },
+    uWaveScale: { value: 0.2 },
   },
   fragmentShader: waterFragmentShader,
   vertexShader: waterVertexShader,
 });
 
-const waterGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
+const waterGeometry = new THREE.PlaneGeometry(200, 200, 200, 200);
 
 const water = new THREE.Mesh(waterGeometry, waterMaterial);
 water.rotation.x = -Math.PI / 2;
@@ -392,6 +395,27 @@ waterFolder
   .step(1.0)
   .name("Opacity Blending width");
 
+// Water animation controls
+const waterAnimationFolder = waterFolder.addFolder("Animation").close();
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveAmplitude, "value")
+  .min(0)
+  .max(2)
+  .step(0.01)
+  .name("Wave Amplitude");
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveSpeed, "value")
+  .min(0)
+  .max(2)
+  .step(0.1)
+  .name("Wave Speed");
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveScale, "value")
+  .min(0.01)
+  .max(0.5)
+  .step(0.01)
+  .name("Wave Scale");
+
 const planeOptionsFolder = gui.addFolder("Plane").close();
 planeOptionsFolder
   .add(terrainParams.geometry, "size")
@@ -549,6 +573,8 @@ const clock = new THREE.Clock();
 // animations
 const loop = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  waterMaterial.uniforms.uTime.value = elapsedTime;
 
   // update controls
   controls.update();
