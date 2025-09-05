@@ -244,7 +244,7 @@ const skyMaterial = new CustomShaderMaterial({
 const sky = new THREE.Mesh(skyGeometry, skyMaterial);
 scene.add(sky);
 
-// Function to update sky and fog colors
+// Function to update sky colors
 const updateSkyColors = () => {
   skyMaterial.uniforms.baseColor.value = new THREE.Vector3(
     ...skyColors.baseColor
@@ -252,7 +252,6 @@ const updateSkyColors = () => {
   skyMaterial.uniforms.horizonColor.value = new THREE.Vector3(
     ...skyColors.horizonColor
   );
-  fog.color = new THREE.Color(...skyColors.baseColor);
 };
 
 // debug gui
@@ -276,14 +275,7 @@ fogFolder
   });
 fogFolder.add(fog, "near").min(1).max(100).step(1).name("Near distance");
 fogFolder.add(fog, "far").min(50).max(500).step(5).name("Far distance");
-fogFolder
-  .add({ syncWithSky: true }, "syncWithSky")
-  .name("Sync color with sky")
-  .onChange((sync) => {
-    if (sync) {
-      updateSkyColors();
-    }
-  });
+fogFolder.addColor(fog, "color").name("Fog color");
 
 const lightsFolder = gui.addFolder("Lights").close();
 const ambientFolder = lightsFolder.addFolder("Ambient Light");
@@ -365,7 +357,7 @@ colorStops.forEach((stop, index) => {
     .onChange(updateColorUniforms);
 });
 
-const waterFolder = gui.addFolder("Water");
+const waterFolder = gui.addFolder("Water").close();
 waterFolder.add(water, "visible").name("Enabled");
 waterFolder.add(water.position, "y").name("Height").min(-10).max(10);
 waterFolder
