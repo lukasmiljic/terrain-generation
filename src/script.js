@@ -3,10 +3,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import GUI from "lil-gui";
 
-import vertexShader from "./shaders/vertex.glsl";
-import fragmentShader from "./shaders/fragment.glsl";
+import terrainVertexShader from "./shaders/terrainVertex.glsl";
+import terrainFragmentShader from "./shaders/terrainFragment.glsl";
 import skyVertexShader from "./shaders/sky/skyVertex.glsl";
 import skyFragmentShader from "./shaders/sky/skyFragment.glsl";
+import waterVertexShader from "./shaders/water/waterVertex.glsl";
+import waterFragmentShader from "./shaders/water/waterFragment.glsl";
 
 // debug
 const gui = new GUI();
@@ -20,7 +22,7 @@ const scene = new THREE.Scene();
 // Sky colors
 const skyColors = {
   baseColor: [0.051, 0.4706, 0.8902],
-  highColor: [0.7529, 0.6, 0.2078],
+  horizonColor: [0.7529, 0.6, 0.2078],
 };
 
 // fog
@@ -44,16 +46,35 @@ directionalLight.shadow.mapSize.height = 2046;
 scene.add(ambientLight, directionalLight);
 
 // water
+const waterColors = {
+  waterColor: [0.0, 0.2, 1.0],
+  horizonColor: [...skyColors.horizonColor],
+};
+
 const waterMaterial = new CustomShaderMaterial({
-  baseMaterial: THREE.MeshBasicMaterial,
-  color: 0x0074cc,
+  baseMaterial: THREE.MeshPhysicalMaterial,
+  metalness: 0.0,
+  roughness: 0.75,
+  reflectivity: 0.8,
+  transmission: 0.0,
+  transparent: true,
+  ior: 1.33,
+  thickness: 0.5,
+  uniforms: {
+    uColor: { value: new THREE.Vector3(...waterColors.waterColor) },
+    uOpacityFadeStart: { value: 45.0 },
+    uBlendWidth: { value: 20.0 },
+    uOpacity: { value: 0.75 },
+  },
+  fragmentShader: waterFragmentShader,
+  vertexShader: waterVertexShader,
 });
 
 const waterGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
 
 const water = new THREE.Mesh(waterGeometry, waterMaterial);
 water.rotation.x = -Math.PI / 2;
-water.position.y = -8;
+water.position.y = -3.8;
 
 scene.add(water);
 
@@ -186,15 +207,15 @@ const generateSeed = (userInput) => {
 const normalMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshNormalMaterial,
   uniforms: uniforms,
-  vertexShader: vertexShader,
+  vertexShader: terrainVertexShader,
 });
 
 const terrainMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshPhysicalMaterial,
   roughness: 0.45,
   uniforms: uniforms,
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
+  vertexShader: terrainVertexShader,
+  fragmentShader: terrainFragmentShader,
 });
 
 const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
@@ -205,7 +226,7 @@ scene.add(terrain);
 // sky sphere
 const skyUniforms = {
   baseColor: { value: new THREE.Vector3(...skyColors.baseColor) },
-  highColor: { value: new THREE.Vector3(...skyColors.highColor) },
+  horizonColor: { value: new THREE.Vector3(...skyColors.horizonColor) },
 };
 
 const skyGeometry = new THREE.SphereGeometry(100, 32, 32);
@@ -225,8 +246,8 @@ const updateSkyColors = () => {
   skyMaterial.uniforms.baseColor.value = new THREE.Vector3(
     ...skyColors.baseColor
   );
-  skyMaterial.uniforms.highColor.value = new THREE.Vector3(
-    ...skyColors.highColor
+  skyMaterial.uniforms.horizonColor.value = new THREE.Vector3(
+    ...skyColors.horizonColor
   );
   fog.color = new THREE.Color(...skyColors.baseColor);
 };
@@ -236,10 +257,10 @@ const skyFolder = gui.addFolder("Sky").close();
 skyFolder.add(sky, "visible").name("Enable");
 skyFolder
   .addColor(skyColors, "baseColor")
-  .name("Horizon color")
+  .name("Base color")
   .onChange(updateSkyColors);
 skyFolder
-  .addColor(skyColors, "highColor")
+  .addColor(skyColors, "horizonColor")
   .name("Zenith color")
   .onChange(updateSkyColors);
 
@@ -344,6 +365,32 @@ colorStops.forEach((stop, index) => {
 const waterFolder = gui.addFolder("Water");
 waterFolder.add(water, "visible").name("Enabled");
 waterFolder.add(water.position, "y").name("Height").min(-10).max(10);
+waterFolder
+  .addColor(waterColors, "waterColor")
+  .name("Water Color")
+  .onChange(() => {
+    waterMaterial.uniforms.uColor.value = new THREE.Vector3(
+      ...waterColors.waterColor
+    );
+  });
+waterFolder
+  .add(waterMaterial.uniforms.uOpacity, "value")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .name("Opacity");
+waterFolder
+  .add(waterMaterial.uniforms.uOpacityFadeStart, "value")
+  .min(0)
+  .max(200)
+  .step(1.0)
+  .name("Opacity Fade Start");
+waterFolder
+  .add(waterMaterial.uniforms.uBlendWidth, "value")
+  .min(0)
+  .max(100)
+  .step(1.0)
+  .name("Opacity Blending width");
 
 const planeOptionsFolder = gui.addFolder("Plane").close();
 planeOptionsFolder
