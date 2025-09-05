@@ -3,10 +3,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import GUI from "lil-gui";
 
-import vertexShader from "./shaders/vertex.glsl";
-import fragmentShader from "./shaders/fragment.glsl";
+import terrainVertexShader from "./shaders/terrainVertex.glsl";
+import terrainFragmentShader from "./shaders/terrainFragment.glsl";
 import skyVertexShader from "./shaders/sky/skyVertex.glsl";
 import skyFragmentShader from "./shaders/sky/skyFragment.glsl";
+import waterVertexShader from "./shaders/water/waterVertex.glsl";
+import waterFragmentShader from "./shaders/water/waterFragment.glsl";
 
 // debug
 const gui = new GUI();
@@ -20,7 +22,7 @@ const scene = new THREE.Scene();
 // Sky colors
 const skyColors = {
   baseColor: [0.051, 0.4706, 0.8902],
-  highColor: [0.7529, 0.6, 0.2078],
+  horizonColor: [0.7529, 0.6, 0.2078],
 };
 
 // fog
@@ -42,6 +44,42 @@ directionalLight.shadow.mapSize.width = 2046;
 directionalLight.shadow.mapSize.height = 2046;
 
 scene.add(ambientLight, directionalLight);
+
+// water
+const waterColors = {
+  waterColor: [0.0, 0.2, 1.0],
+};
+
+const waterMaterial = new CustomShaderMaterial({
+  baseMaterial: THREE.MeshPhysicalMaterial,
+  metalness: 0.0,
+  roughness: 0.75,
+  reflectivity: 0.8,
+  transmission: 0.0,
+  transparent: true,
+  ior: 1.33,
+  thickness: 0.5,
+  uniforms: {
+    uColor: { value: new THREE.Vector3(...waterColors.waterColor) },
+    uOpacityFadeStart: { value: 45.0 },
+    uBlendWidth: { value: 20.0 },
+    uOpacity: { value: 0.75 },
+    uTime: { value: 0.0 },
+    uWaveAmplitude: { value: 0.2 },
+    uWaveSpeed: { value: 2.0 },
+    uWaveScale: { value: 0.2 },
+  },
+  fragmentShader: waterFragmentShader,
+  vertexShader: waterVertexShader,
+});
+
+const waterGeometry = new THREE.PlaneGeometry(200, 200, 200, 200);
+
+const water = new THREE.Mesh(waterGeometry, waterMaterial);
+water.rotation.x = -Math.PI / 2;
+water.position.y = -3.8;
+
+scene.add(water);
 
 /*
 terrain
@@ -126,6 +164,8 @@ const uniforms = {
     value: colorStops.map((stop) => new THREE.Vector3(...stop.colorHigh)),
   },
   uStops: { value: colorStops.map((stop) => stop.position) },
+  uFlatten: { value: false },
+  uColors: { value: true },
 };
 
 // geometry
@@ -170,15 +210,15 @@ const generateSeed = (userInput) => {
 const normalMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshNormalMaterial,
   uniforms: uniforms,
-  vertexShader: vertexShader,
+  vertexShader: terrainVertexShader,
 });
 
 const terrainMaterial = new CustomShaderMaterial({
   baseMaterial: THREE.MeshPhysicalMaterial,
   roughness: 0.45,
   uniforms: uniforms,
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
+  vertexShader: terrainVertexShader,
+  fragmentShader: terrainFragmentShader,
 });
 
 const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
@@ -189,7 +229,7 @@ scene.add(terrain);
 // sky sphere
 const skyUniforms = {
   baseColor: { value: new THREE.Vector3(...skyColors.baseColor) },
-  highColor: { value: new THREE.Vector3(...skyColors.highColor) },
+  horizonColor: { value: new THREE.Vector3(...skyColors.horizonColor) },
 };
 
 const skyGeometry = new THREE.SphereGeometry(100, 32, 32);
@@ -204,15 +244,14 @@ const skyMaterial = new CustomShaderMaterial({
 const sky = new THREE.Mesh(skyGeometry, skyMaterial);
 scene.add(sky);
 
-// Function to update sky and fog colors
+// Function to update sky colors
 const updateSkyColors = () => {
   skyMaterial.uniforms.baseColor.value = new THREE.Vector3(
     ...skyColors.baseColor
   );
-  skyMaterial.uniforms.highColor.value = new THREE.Vector3(
-    ...skyColors.highColor
+  skyMaterial.uniforms.horizonColor.value = new THREE.Vector3(
+    ...skyColors.horizonColor
   );
-  fog.color = new THREE.Color(...skyColors.baseColor);
 };
 
 // debug gui
@@ -220,10 +259,10 @@ const skyFolder = gui.addFolder("Sky").close();
 skyFolder.add(sky, "visible").name("Enable");
 skyFolder
   .addColor(skyColors, "baseColor")
-  .name("Horizon color")
+  .name("Base color")
   .onChange(updateSkyColors);
 skyFolder
-  .addColor(skyColors, "highColor")
+  .addColor(skyColors, "horizonColor")
   .name("Zenith color")
   .onChange(updateSkyColors);
 
@@ -236,14 +275,7 @@ fogFolder
   });
 fogFolder.add(fog, "near").min(1).max(100).step(1).name("Near distance");
 fogFolder.add(fog, "far").min(50).max(500).step(5).name("Far distance");
-fogFolder
-  .add({ syncWithSky: true }, "syncWithSky")
-  .name("Sync color with sky")
-  .onChange((sync) => {
-    if (sync) {
-      updateSkyColors();
-    }
-  });
+fogFolder.addColor(fog, "color").name("Fog color");
 
 const lightsFolder = gui.addFolder("Lights").close();
 const ambientFolder = lightsFolder.addFolder("Ambient Light");
@@ -295,9 +327,75 @@ const updateColorUniforms = () => {
     (stop) => stop.position
   );
 };
-const terrainColorsFolder = gui.addFolder("Terrain colors").close();
+const waterFolder = gui.addFolder("Water").close();
+waterFolder.add(water, "visible").name("Enabled");
+waterFolder.add(water.position, "y").name("Height").min(-10).max(10);
+waterFolder
+  .addColor(waterColors, "waterColor")
+  .name("Water Color")
+  .onChange(() => {
+    waterMaterial.uniforms.uColor.value = new THREE.Vector3(
+      ...waterColors.waterColor
+    );
+  });
+waterFolder
+  .add(waterMaterial.uniforms.uOpacity, "value")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .name("Opacity");
+waterFolder
+  .add(waterMaterial.uniforms.uOpacityFadeStart, "value")
+  .min(0)
+  .max(200)
+  .step(1.0)
+  .name("Opacity Fade Start");
+waterFolder
+  .add(waterMaterial.uniforms.uBlendWidth, "value")
+  .min(0)
+  .max(100)
+  .step(1.0)
+  .name("Opacity Blending width");
 
-// Slope blending controls
+// Water animation controls
+const waterAnimationFolder = waterFolder.addFolder("Animation").close();
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveAmplitude, "value")
+  .min(0)
+  .max(2)
+  .step(0.01)
+  .name("Wave Amplitude");
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveSpeed, "value")
+  .min(0)
+  .max(2)
+  .step(0.1)
+  .name("Wave Speed");
+waterAnimationFolder
+  .add(waterMaterial.uniforms.uWaveScale, "value")
+  .min(0.01)
+  .max(0.5)
+  .step(0.01)
+  .name("Wave Scale");
+
+const planeOptionsFolder = gui.addFolder("Plane").close();
+planeOptionsFolder
+  .add(terrainParams.geometry, "size")
+  .min(16)
+  .max(256)
+  .step(1)
+  .name("Plane width")
+  .onFinishChange(updateGeometry);
+planeOptionsFolder
+  .add(terrainParams.geometry, "resolution")
+  .min(16)
+  .max(1024)
+  .step(1)
+  .name("Resolution")
+  .onFinishChange(updateGeometry);
+
+const terrainFolder = gui.addFolder("Terrain");
+const terrainColorsFolder = terrainFolder.addFolder("Terrain colors").close();
 const slopeBlendingFolder = terrainColorsFolder.addFolder("Slope blending");
 slopeBlendingFolder
   .add(terrainMaterial.uniforms.uSlopeThreshold, "value")
@@ -324,45 +422,27 @@ colorStops.forEach((stop, index) => {
     .name("Height")
     .onChange(updateColorUniforms);
 });
-
-const planeOptionsFolder = gui.addFolder("Plane").close();
-planeOptionsFolder
-  .add(terrainParams.geometry, "size")
-  .min(16)
-  .max(256)
-  .step(1)
-  .name("Plane width")
-  .onFinishChange(updateGeometry);
-planeOptionsFolder
-  .add(terrainParams.geometry, "resolution")
-  .min(16)
-  .max(1024)
-  .step(1)
-  .name("Resolution")
-  .onFinishChange(updateGeometry);
-
-const shaderFolder = gui.addFolder("Terrain");
-shaderFolder
+terrainFolder
   .add(seedSettings, "seedString")
   .name("Seed")
   .onFinishChange((input) => {
     terrainMaterial.uniforms.uSeed.value = generateSeed(input);
   });
-shaderFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
-shaderFolder.add(terrainMaterial.uniforms.uSharpen, "value").name("Sharpen");
-shaderFolder
+terrainFolder.add(terrainMaterial.uniforms.uIsRidged, "value").name("Ridged");
+terrainFolder.add(terrainMaterial.uniforms.uSharpen, "value").name("Sharpen");
+terrainFolder
   .add(terrainMaterial.uniforms.uScale, "value")
   .min(0.01)
   .max(0.1)
   .step(0.001)
   .name("Scale");
-shaderFolder
+terrainFolder
   .add(terrainMaterial.uniforms.uAmplitude, "value")
   .min(0.1)
   .max(20.0)
   .step(0.1)
   .name("Amplitude");
-const offsetSubfolder = shaderFolder.addFolder("Offset").close();
+const offsetSubfolder = terrainFolder.addFolder("Offset").close();
 offsetSubfolder
   .add(terrainMaterial.uniforms.uOffsetX, "value")
   .min(-1024)
@@ -375,7 +455,7 @@ offsetSubfolder
   .max(1024)
   .step(1)
   .name("Y");
-const fbmSubfolder = shaderFolder.addFolder("Fractal Brownian Motion").close();
+const fbmSubfolder = terrainFolder.addFolder("Fractal Brownian Motion").close();
 fbmSubfolder
   .add(terrainMaterial.uniforms.uOctaves, "value")
   .min(1)
@@ -400,7 +480,7 @@ fbmSubfolder
   .max(3.14)
   .step(0.1)
   .name("Octave rotation delta");
-const maskSubfolder = shaderFolder.addFolder("Mask").close();
+const maskSubfolder = terrainFolder.addFolder("Mask").close();
 maskSubfolder.add(terrainMaterial.uniforms.uMask, "value").name("Enabled");
 maskSubfolder
   .add(terrainMaterial.uniforms.uShowMask, "value")
@@ -411,7 +491,7 @@ maskSubfolder
   .max(4)
   .step(0.1)
   .name("Mask fade start");
-const debugSubfolder = shaderFolder.addFolder("Debug").close();
+const debugSubfolder = terrainFolder.addFolder("Debug").close();
 debugSubfolder.add(terrainMaterial, "wireframe").name("Wireframe");
 debugSubfolder
   .add(terrainParams.debug, "normals")
@@ -419,6 +499,10 @@ debugSubfolder
   .onChange((showNormals) => {
     terrain.material = showNormals ? normalMaterial : terrainMaterial;
   });
+debugSubfolder.add(terrainMaterial.uniforms.uFlatten, "value").name("Flatten");
+debugSubfolder
+  .add(terrainMaterial.uniforms.uColors, "value")
+  .name("Colorize terrain");
 
 // sizes
 const sizes = {
@@ -478,6 +562,8 @@ const clock = new THREE.Clock();
 // animations
 const loop = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  waterMaterial.uniforms.uTime.value = elapsedTime;
 
   // update controls
   controls.update();
