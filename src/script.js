@@ -395,7 +395,7 @@ planeOptionsFolder
   .onFinishChange(updateGeometry);
 
 const terrainFolder = gui.addFolder("Terrain");
-const terrainColorsFolder = terrainFolder.addFolder("Terrain colors").close();
+const terrainColorsFolder = terrainFolder.addFolder("Colors").close();
 const slopeBlendingFolder = terrainColorsFolder.addFolder("Slope blending");
 slopeBlendingFolder
   .add(terrainMaterial.uniforms.uSlopeThreshold, "value")
