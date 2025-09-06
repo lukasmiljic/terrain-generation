@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;1,14..32,100..900&display=swap");
+
 html,
 body {
   overflow: hidden;
@@ -8,4 +10,34 @@ body {
   top: 0;
   left: 0;
   outline: none;
+}
+
+.lil-gui.root {
+  top: unset;
+  backdrop-filter: blur(8px);
+  border-radius: 6px;
+  border: 1px solid #ffffff38;
+  overflow: hidden;
+}
+
+.lil-gui input,
+.lil-gui .controller.number .slider {
+  border: 1px solid #ffffff34;
+}
+
+.lil-gui {
+  --background-color: #ffffff10;
+  --text-color: #fffffff0;
+  --title-background-color: #efefef78;
+  --title-text-color: #ffffff;
+  --widget-color: #eaeaea69;
+  --hover-color: #f0f0f08c;
+  --focus-color: #f0f0f0a3;
+  --number-color: #ffffffae;
+  --string-color: #ffffffae;
+  --widget-border-radius: 3px;
+  --font-size: 12px;
+  --input-font-size: 12px;
+  --font-family: "Inter", sans-serif;
+  --font-family-mono: "Inter", Menlo, Monaco, Consolas, monospace;
 }
